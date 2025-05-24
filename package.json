@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "install:legacy": "npm install --legacy-peer-deps",
     "dev": "next dev --turbopack",
     "postinstall": "prisma generate --no-engine",
     "build": "next build",
