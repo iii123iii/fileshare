@@ -1,11 +1,5 @@
 import { Button } from "@/components/ui/button";
-import {
-  ArrowRight,
-  Upload,
-  Monitor,
-  Share2,
-  FolderKanban,
-} from "lucide-react";
+import { ArrowRight, Monitor, Share2, FolderKanban } from "lucide-react";
 import Link from "next/link";
 
 const features = [

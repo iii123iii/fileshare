@@ -7,8 +7,21 @@ import { CheckCircle } from "lucide-react";
 import { UserButton } from "@clerk/nextjs";
 
 export function Navbar() {
-  /*const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);*/ // Always keep the scrolled state true
-  const scrolled = true;
+  /*const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);*/
+  const [scrolled, setScrolled] = useState(false);
+  /*const pathname = usePathname();*/
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const isScrolled = window.scrollY > 10;
+      if (isScrolled !== scrolled) {
+        setScrolled(isScrolled);
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [scrolled]);
 
   /*useEffect(() => {
     setIsMobileMenuOpen(false);
