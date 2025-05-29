@@ -1,7 +1,8 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
+import { UserButton } from "@clerk/nextjs";
+import { Authenticated, Unauthenticated } from "convex/react";
 import { CheckCircle } from "lucide-react";
 import Link from "next/link";
 import { useState, useEffect } from "react";
@@ -49,16 +50,16 @@ const Navbar = () => {
             </Link>
           </div>
           <div className="flex items-center">
-            <SignedOut>
+            <Unauthenticated>
               <Link href="/sign-in">
                 <Button className="buttonGradientOutline" variant={"outline"}>
                   Log in
                 </Button>
               </Link>
-            </SignedOut>
-            <SignedIn>
+            </Unauthenticated>
+            <Authenticated>
               <UserButton />
-            </SignedIn>
+            </Authenticated>
           </div>
         </div>
       </div>

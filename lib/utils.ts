@@ -23,3 +23,8 @@ export function formatFileSize(bytes: number): string {
     Number.parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i]
   );
 }
+
+export const extractUserId = (tokenIdentifier: string): string => {
+  const parts = tokenIdentifier.split("|");
+  return parts[parts.length - 1];
+};

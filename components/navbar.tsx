@@ -5,6 +5,7 @@ import Link from "next/link";
 /*import { usePathname } from "next/navigation";*/
 import { CheckCircle } from "lucide-react";
 import { UserButton } from "@clerk/nextjs";
+import { Authenticated } from "convex/react";
 
 export function Navbar() {
   /*const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);*/
@@ -91,7 +92,9 @@ export function Navbar() {
         </div>
 
         <div className="flex items-center gap-4 flex-shrink-0 ml-2">
-          <UserButton />
+          <Authenticated>
+            <UserButton />
+          </Authenticated>
         </div>
       </div>
 

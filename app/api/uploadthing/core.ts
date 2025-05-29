@@ -1,11 +1,12 @@
 import { getAuth } from "@clerk/nextjs/server";
 import { createUploadthing, type FileRouter } from "uploadthing/next";
 import { UploadThingError } from "uploadthing/server";
+import { fetchMutation } from "convex/nextjs";
 
 const f = createUploadthing();
 
 import { NextRequest } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { api } from "@/convex/_generated/api";
 
 const auth = async (req: NextRequest) => await getAuth(req);
 
@@ -14,75 +15,48 @@ export const fileShareFileRouter = {
     blob: { maxFileCount: 1, minFileCount: 1, maxFileSize: "64MB" },
   })
     .middleware(async ({ req, files }) => {
-      const user = await auth(req);
-
-      if (!user.userId) throw new UploadThingError("Unauthorized");
-
-      let usedStorage = 0;
-
-      const userUsedStorage = await prisma.user.findUnique({
-        where: {
-          id: user.userId,
-        },
-        select: {
-          usedStorage: true,
-        },
+      const token = await (
+        await auth(req)
+      ).getToken({
+        template: "convex",
       });
 
-      if (!userUsedStorage) {
-        await prisma.user.create({
-          data: {
-            id: user.userId,
-            usedStorage: 0,
-          },
-        });
-
-        usedStorage = 0;
-      } else {
-        usedStorage = userUsedStorage?.usedStorage;
+      if (token == null) {
+        throw new UploadThingError("Unauthorized");
       }
 
-      const storageLeft = 64000000 - usedStorage;
+      const user = await fetchMutation(
+        api.user.getOrCreate,
+        {},
+        {
+          token: token,
+        }
+      );
+
+      const storageLeft = 64000000 - user.usedStorage;
 
       if (storageLeft < files[0].size) {
         throw new UploadThingError("Not enough storage");
       }
 
-      return { userId: user.userId };
+      return { user: user, token: token };
     })
     .onUploadComplete(async ({ metadata, file }) => {
-      const data = await prisma.file.create({
-        data: {
+      await fetchMutation(
+        api.files.upload,
+        {
+          _userId: metadata.user._id,
+          usedStorage: metadata.user.usedStorage,
           id: file.key,
-          uid: metadata.userId,
           name: file.name,
-          type: file.type,
           size: file.size,
+          type: file.type,
           link: file.ufsUrl,
         },
-        select: {
-          id: true,
-          uid: true,
-          name: true,
-          type: true,
-          size: true,
-          link: true,
-          uploadDate: true,
-        },
-      });
-
-      await prisma.user.update({
-        where: {
-          id: metadata.userId,
-        },
-        data: {
-          usedStorage: {
-            increment: file.size,
-          },
-        },
-      });
-
-      return { data: { ...data, uploadDate: data.uploadDate.toISOString() } };
+        {
+          token: metadata.token,
+        }
+      );
     }),
 } satisfies FileRouter;
 

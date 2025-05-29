@@ -1,34 +1,18 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { FileUploader } from "./file-uploader";
 import { FileList } from "./file-list";
 import { Navbar } from "./navbar";
-import { file } from "@/types/types";
 import { Skeleton } from "./ui/skeleton";
-import { useAddFile, useUpdateStorageSize, useFileStorage } from "@/hooks";
+import { useQuery } from "convex/react";
+import { api } from "@/convex/_generated/api";
 
 export default function Dashboard() {
-  const { data, isLoading } = useFileStorage();
-  const updateStorageSize = useUpdateStorageSize();
+  const usedStorage = useQuery(api.user.get);
 
-  const addFile = useAddFile();
+  const files = useQuery(api.files.get);
 
-  const [files, setFiles] = useState<file[]>([]);
-
-  useEffect(() => {
-    if (data?.files) {
-      setFiles(data.files);
-    }
-  }, [data?.files]);
-
-  const handleFileUpload = (newFile: file) => {
-    setFiles((prevFiles) => [newFile, ...prevFiles]);
-    addFile(newFile);
-    updateStorageSize(newFile.size);
-  };
-
-  const totalStorageUsed = data?.usedStorage ?? 0;
+  const totalStorageUsed = usedStorage?.usedStorage ?? 0;
   const maxStorage = 64 * 1024 * 1024;
   const storagePercentage = Math.min(
     (totalStorageUsed / maxStorage) * 100,
@@ -51,15 +35,20 @@ export default function Dashboard() {
 
           <div className="grid gap-6 grid-cols-1 md:grid-cols-[minmax(0,1fr)_minmax(0,300px)]">
             <div className="space-y-6 min-w-0">
-              <FileUploader onUpload={handleFileUpload} />
+              <FileUploader />
               <div>
                 <h2 className="text-xl font-semibold mb-4">Recent Files</h2>
-                <FileList />
+                <FileList
+                  files={files?.map((file) => ({
+                    ...file,
+                    uploadDate: new Date(file.uploadDate),
+                  }))}
+                />
               </div>
             </div>
 
             <div className="space-y-6 min-w-0">
-              {isLoading ? (
+              {usedStorage === undefined ? (
                 <div className="rounded-lg border bg-card text-card-foreground shadow-sm overflow-hidden">
                   <div className="p-4 sm:p-6 flex flex-col gap-2">
                     <Skeleton className="h-6 w-1/3 rounded" />
@@ -108,14 +97,14 @@ export default function Dashboard() {
 
               <div className="rounded-lg border bg-card text-card-foreground shadow-sm overflow-hidden">
                 <div className="p-4 sm:p-6">
-                  {isLoading ? (
+                  {files === undefined ? (
                     <Skeleton className="h-6 w-1/2 rounded mb-2" />
                   ) : (
                     <h3 className="font-semibold text-lg mb-2">
                       Recent Activity
                     </h3>
                   )}
-                  {isLoading ? (
+                  {files === undefined ? (
                     <div className="space-y-4">
                       {[...Array(3)].map((_, index) => (
                         <div key={index} className="flex items-center gap-2">

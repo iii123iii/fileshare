@@ -4,6 +4,6 @@ export interface file {
   size: number;
   type: string;
   id: string;
-  uid: string;
+  userId: string;
   uploadDate: Date;
 }

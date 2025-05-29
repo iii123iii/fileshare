@@ -9,6 +9,7 @@ import { fileShareFileRouter } from "./api/uploadthing/core";
 import { Toaster } from "sonner";
 import QueryClientContextProvider from "@/components/QueryClientContextProvider";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+import ConvexClientProvider from "@/components/ConvexClientProvider";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -25,17 +26,22 @@ export default function RootLayout({
 }>) {
   return (
     <QueryClientContextProvider>
-      <ClerkProvider afterSignOutUrl="/sign-in">
-        <html lang="en" suppressHydrationWarning>
-          <body className={inter.className}>
-            <NextSSRPlugin
-              routerConfig={extractRouterConfig(fileShareFileRouter)}
-            />
-            <div>{children}</div>
-            <Toaster richColors />
-            <ReactQueryDevtools initialIsOpen={false} />
-          </body>
-        </html>
+      <ClerkProvider
+        afterSignOutUrl="/sign-in"
+        publishableKey={process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY}
+      >
+        <ConvexClientProvider>
+          <html lang="en" suppressHydrationWarning>
+            <body className={inter.className}>
+              <NextSSRPlugin
+                routerConfig={extractRouterConfig(fileShareFileRouter)}
+              />
+              <div>{children}</div>
+              <Toaster richColors />
+              <ReactQueryDevtools initialIsOpen={false} />
+            </body>
+          </html>
+        </ConvexClientProvider>
       </ClerkProvider>
     </QueryClientContextProvider>
   );

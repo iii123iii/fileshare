@@ -3,13 +3,8 @@
 import type React from "react";
 import { UploadDropzone } from "@/lib/uploadthing";
 import { toast } from "sonner";
-import { file } from "@/types/types";
 
-interface Props {
-  onUpload: (file: file) => void;
-}
-
-export function FileUploader({ onUpload }: Props) {
+export function FileUploader() {
   return (
     <div className="space-y-4 w-full overflow-hidden">
       <UploadDropzone
@@ -35,12 +30,8 @@ export function FileUploader({ onUpload }: Props) {
         onUploadError={(e) => {
           toast.error(e.message, { id: "FileUpload" });
         }}
-        onClientUploadComplete={(file) => {
+        onClientUploadComplete={() => {
           toast.success("File uploaded successfully", { id: "FileUpload" });
-          onUpload({
-            ...file[0].serverData.data,
-            uploadDate: new Date(file[0].serverData.data.uploadDate),
-          });
         }}
       />
     </div>

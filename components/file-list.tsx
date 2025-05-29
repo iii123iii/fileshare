@@ -33,17 +33,18 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { file } from "@/types/types";
-import { useDeleteFile, useFileStorage } from "@/hooks";
 import { Skeleton } from "./ui/skeleton";
 import { toast } from "sonner";
 
-export function FileList() {
+interface Props {
+  files: file[] | undefined;
+}
+
+export function FileList({ files }: Props) {
   const [shareDialogOpen, setShareDialogOpen] = useState(false);
   const [currentFile, setCurrentFile] = useState<file | null>(null);
   const [copied, setCopied] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-  const { data, isLoading } = useFileStorage();
-  const deleteFileMutation = useDeleteFile();
 
   const getFileIcon = (fileType: string) => {
     if (fileType.startsWith("image/")) return <ImageIcon className="h-5 w-5" />;
@@ -75,7 +76,13 @@ export function FileList() {
   const handleDelete = async (fileId: string) => {
     setIsDeleting(true);
     try {
-      await deleteFileMutation.mutateAsync(fileId);
+      await fetch("/api/delete", {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ fileId: fileId }),
+      });
       toast.success("File deleted successfully");
     } catch (error: unknown) {
       if (error instanceof Error) {
@@ -120,13 +127,12 @@ export function FileList() {
     }
   };
 
-  if (isLoading) {
+  if (files === undefined) {
     return (
       <Skeleton className="w-full h-[200px] rounded-lg border shadow-sm" />
     );
   }
-
-  if (data?.files.length === 0) {
+  if (files.length === 0) {
     return (
       <div className="rounded-lg border bg-card text-card-foreground shadow-sm p-8 text-center">
         <h3 className="font-medium text-lg">No files uploaded yet</h3>
@@ -159,7 +165,7 @@ export function FileList() {
               </tr>
             </thead>
             <tbody className="[&_tr:last-child]:border-0">
-              {data?.files.map((file) => (
+              {files.map((file) => (
                 <tr
                   key={file.id}
                   className="border-b transition-colors hover:bg-muted/50"
@@ -216,7 +222,7 @@ export function FileList() {
 
       <div className="md:hidden max-h-[600px] overflow-y-auto">
         <div className="divide-y divide-border">
-          {data?.files.map((file) => (
+          {files.map((file) => (
             <div key={file.id} className="p-4 space-y-3">
               <div className="flex items-start justify-between gap-3">
                 <div className="flex items-center gap-3 min-w-0 flex-1">
