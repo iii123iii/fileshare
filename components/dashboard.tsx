@@ -6,6 +6,7 @@ import { Navbar } from "./navbar";
 import { Skeleton } from "./ui/skeleton";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
+import { MAXSTORAGESIZE } from "@/lib/constants";
 
 export default function Dashboard() {
   const usedStorage = useQuery(api.user.get);
@@ -13,9 +14,8 @@ export default function Dashboard() {
   const files = useQuery(api.files.get);
 
   const totalStorageUsed = usedStorage?.usedStorage ?? 0;
-  const maxStorage = 64 * 1024 * 1024;
   const storagePercentage = Math.min(
-    (totalStorageUsed / maxStorage) * 100,
+    (totalStorageUsed / MAXSTORAGESIZE) * 100,
     100
   );
 
@@ -87,7 +87,7 @@ export default function Dashboard() {
                       <div className="flex items-center justify-between text-sm">
                         <span className="truncate">Limit</span>
                         <span className="font-medium ml-2 whitespace-nowrap">
-                          64 MB
+                          {MAXSTORAGESIZE / (1024 * 1024)} MB
                         </span>
                       </div>
                     </div>

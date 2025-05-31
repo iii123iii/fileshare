@@ -7,12 +7,13 @@ const f = createUploadthing();
 
 import { NextRequest } from "next/server";
 import { api } from "@/convex/_generated/api";
+import { MAXSTORAGESIZE } from "@/lib/constants";
 
 const auth = async (req: NextRequest) => await getAuth(req);
 
 export const fileShareFileRouter = {
   uploadedFile: f({
-    blob: { maxFileCount: 1, minFileCount: 1, maxFileSize: "64MB" },
+    blob: { maxFileCount: 1, minFileCount: 1, maxFileSize: "512MB" },
   })
     .middleware(async ({ req, files }) => {
       const token = await (
@@ -33,7 +34,7 @@ export const fileShareFileRouter = {
         }
       );
 
-      const storageLeft = 64000000 - user.usedStorage;
+      const storageLeft = MAXSTORAGESIZE - user.usedStorage;
 
       if (storageLeft < files[0].size) {
         throw new UploadThingError("Not enough storage");

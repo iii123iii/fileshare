@@ -3,6 +3,7 @@
 import type React from "react";
 import { UploadDropzone } from "@/lib/uploadthing";
 import { toast } from "sonner";
+import { MAXSTORAGESIZE } from "@/lib/constants";
 
 export function FileUploader() {
   return (
@@ -22,6 +23,7 @@ export function FileUploader() {
           },
           allowedContent: {
             color: "var(--muted-foreground)",
+            content: `File (${(MAXSTORAGESIZE / (1024 * 1024)).toFixed(2)} MB)`,
           },
         }}
         onUploadBegin={() => {
